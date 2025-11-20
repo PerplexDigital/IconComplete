@@ -1,0 +1,95 @@
+{
+  "publisher": "perplex-digital",
+  "name": "icon-complete",
+  "displayName": "IconComplete",
+  "description": "Autocomplete for SVG icon references in <use /> href attributes",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Snippets"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "configuration": {
+      "title": "IconComplete",
+      "properties": {
+        "iconComplete.iconFilePath": {
+          "type": "string",
+          "default": "public/icons/icons.svg",
+          "description": "Path to the SVG file containing icon symbols (relative to workspace root)"
+        }
+      }
+    },
+    "configurationDefaults": {
+      "[html]": {
+        "editor.quickSuggestions": {
+          "strings": true
+        }
+      },
+      "[cshtml]": {
+        "editor.quickSuggestions": {
+          "strings": true
+        }
+      },
+      "[vue]": {
+        "editor.quickSuggestions": {
+          "strings": true
+        }
+      },
+      "[svelte]": {
+        "editor.quickSuggestions": {
+          "strings": true
+        }
+      },
+      "[javascriptreact]": {
+        "editor.quickSuggestions": {
+          "strings": true
+        }
+      },
+      "[typescriptreact]": {
+        "editor.quickSuggestions": {
+          "strings": true
+        }
+      }
+    }
+  },
+  "scripts": {
+    "lint": "eslint src --ext ts",
+    "fix": "eslint src --ext ts --fix",
+    "prepare": "husky",
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile",
+    "test": "node ./out/test/runTest.js"
+  },
+  "lint-staged": {
+    "*.js": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "package.json": "prettier --write"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^20.1.0",
+    "@commitlint/config-conventional": "^20.0.0",
+    "@nuxt/eslint-config": "^1.10.0",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "latest",
+    "@types/vscode": "latest",
+    "@vscode/test-electron": "^2.5.2",
+    "@vscode/vsce": "^3.7.1",
+    "eslint": "^9.39.1",
+    "glob": "^10.5.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
+    "mocha": "^10.8.2",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
+  }
+}

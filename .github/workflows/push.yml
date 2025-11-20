@@ -1,0 +1,79 @@
+# This workflow is intended to run as soon as a commit is pushed to the target branch.
+
+name: Push
+
+# Controls when the action will run.
+on:
+  # Triggers the workflow on push events
+  push:
+    branches:
+      - main
+      - release/*
+      - hotfix/*
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      old-version: ${{ steps.version-bump.outputs.old-version }}
+      new-version: ${{ steps.version-bump.outputs.new-version }}
+      bump-type: ${{ steps.version-bump.outputs.bump-type }}
+    steps:
+      # We need to check out everything that tags can be found
+      # https://github.com/actions/checkout
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      # https://github.com/pnpm/action-setup
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      # https://github.com/actions/setup-node
+      - name: Setup Node.js 22.x
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22.x
+          cache: 'pnpm'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Configure Git user
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Test
+        run: pnpm test
+
+      # Determine which build command to run based on branch
+      - name: Build (Production)
+        if: github.ref == 'refs/heads/main'
+        run: pnpm compile
+
+      - name: Build (Acceptance)
+        if: startsWith(github.ref, 'refs/heads/release/') || startsWith(github.ref, 'refs/heads/hotfix/')
+        run: pnpm compile
+
+      - name: Bump version
+        id: version-bump
+        run: node .github/scripts/version-bump.mjs
+
+      - name: Commit version bump
+        if: steps.version-bump.outputs.new-version != ''
+        run: |
+          git add package.json
+          git commit -m "chore(release): bump version to ${{ steps.version-bump.outputs.new-version }} [skip ci]"
+          git tag -a "v${{ steps.version-bump.outputs.new-version }}" -m "Release v${{ steps.version-bump.outputs.new-version }}"
+          git push origin HEAD --follow-tags
+
+      - name: Publish to VS Code Marketplace
+        if: steps.version-bump.outputs.new-version != ''
+        run: vsce publish ${{ startsWith(github.ref, 'refs/heads/release/') && '--pre-release' || '' }}
