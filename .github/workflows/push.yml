@@ -51,7 +51,7 @@ jobs:
         run: pnpm install
 
       - name: Test
-        run: pnpm test
+        run: xvfb-run -a pnpm test
 
       # Determine which build command to run based on branch
       - name: Build (Production)
