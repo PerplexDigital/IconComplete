@@ -74,7 +74,7 @@ jobs:
           git tag -a "v${{ steps.version-bump.outputs.new-version }}" -m "Release v${{ steps.version-bump.outputs.new-version }}"
           git push origin HEAD --follow-tags
 
-      - name: Publish to VS Code Marketplace
+      - name: Publish to Visual Studio Code Marketplace
         if: steps.version-bump.outputs.new-version != ''
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
