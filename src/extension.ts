@@ -141,35 +141,88 @@ interface IconData {
     symbolElement: string;
 }
 
-async function getIconData(svgPathInHref: string): Promise<IconData[]> {
+async function findViteRoot(): Promise<string | null> {
+    // Nuxt's officially supported config file extensions
+    // See: https://nuxt.com/docs/guide/directory-structure/nuxt-config
+    // "The nuxt.config file extension can either be .js, .ts or .mjs"
+    const nuxtConfigNames = ['nuxt.config.ts', 'nuxt.config.js', 'nuxt.config.mjs'];
+
+    // Vite's own list of config files (from vite/dist/node/chunks/logger.js)
+    // This matches Vite's internal DEFAULT_CONFIG_FILES constant
+    const viteConfigNames = [
+        'vite.config.js',
+        'vite.config.mjs',
+        'vite.config.ts',
+        'vite.config.cjs',
+        'vite.config.mts',
+        'vite.config.cts',
+    ];
+
+    // First, check for Nuxt config files
+    for (const configName of nuxtConfigNames) {
+        const configFiles = await vscode.workspace.findFiles(`**/${configName}`, '**/node_modules/**', 10);
+
+        for (const configFile of configFiles) {
+            // For Nuxt projects, the root is the same directory as nuxt.config
+            // (public folder is at the project root, not in a src folder)
+            const configDir = path.dirname(configFile.fsPath);
+            outputChannel.appendLine(`Found Nuxt config in ${configName}: root is "${configDir}"`);
+            return configDir;
+        }
+    }
+
+    // Search for vite config files in the workspace
+    for (const configName of viteConfigNames) {
+        const configFiles = await vscode.workspace.findFiles(`**/${configName}`, '**/node_modules/**', 10);
+
+        for (const configFile of configFiles) {
+            try {
+                const content = fs.readFileSync(configFile.fsPath, 'utf-8');
+
+                // Try to extract root property from the config
+                // Match patterns like: root: 'path', root: "path", or root: `path`
+                const rootMatch = content.match(/root\s*:\s*['"`]([^'"`]+)['"`]/);
+
+                if (rootMatch) {
+                    const rootPath = rootMatch[1];
+                    const configDir = path.dirname(configFile.fsPath);
+                    const absoluteRoot = path.resolve(configDir, rootPath);
+                    outputChannel.appendLine(`Found Vite root in ${configName}: "${rootPath}" -> "${absoluteRoot}"`);
+                    return absoluteRoot;
+                }
+            } catch (error) {
+                outputChannel.appendLine(`Error reading ${configName}: ${error}`);
+            }
+        }
+    }
+
+    outputChannel.appendLine('No Vite or Nuxt root found in config files');
+    return null;
+}
+
+async function getIconData(_svgPathInHref: string): Promise<IconData[]> {
     const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
     if (!workspaceFolder) {
         outputChannel.appendLine('No workspace folder found');
         return [];
     }
 
-    // Resolve the SVG path - it could be relative to workspace or use a configured path
+    // Resolve the SVG path - ignore the href path and build from Vite config
     let fullPath: string;
 
-    // If the path starts with /, it's relative to the workspace root
-    // In Vite, paths like /icons/icons.svg actually map to /public/icons/icons.svg
-    if (svgPathInHref.startsWith('/')) {
-        // Try public folder first (Vite convention)
-        const publicPath = path.join(workspaceFolder.uri.fsPath, 'public', svgPathInHref);
-        if (fs.existsSync(publicPath)) {
-            fullPath = publicPath;
-            outputChannel.appendLine(`Found in public folder: "${fullPath}"`);
-        } else {
-            // Fall back to workspace root
-            fullPath = path.join(workspaceFolder.uri.fsPath, svgPathInHref);
-            outputChannel.appendLine(`Using workspace root: "${fullPath}"`);
-        }
+    // First, try to find Vite root from config
+    const viteRoot = await findViteRoot();
+
+    if (viteRoot) {
+        // Build path as: vite.config directory + root option + /public/icons/icons.svg
+        fullPath = path.join(viteRoot, 'public', 'icons', 'icons.svg');
+        outputChannel.appendLine(`Built path from Vite config: "${fullPath}"`);
     } else {
-        // Otherwise, use the configured path
+        // Fall back to configured path
         const config = vscode.workspace.getConfiguration('iconComplete');
         const iconFilePath = config.get<string>('iconFilePath', 'public/icons/icons.svg');
         fullPath = path.join(workspaceFolder.uri.fsPath, iconFilePath);
-        outputChannel.appendLine(`Using configured path: "${fullPath}"`);
+        outputChannel.appendLine(`Using configured path (no Vite config): "${fullPath}"`);
     }
 
     outputChannel.appendLine(`Resolved full path: "${fullPath}"`);
@@ -235,10 +288,10 @@ function createIconDataUri(symbolElement: string): vscode.Uri {
     const isDarkTheme =
         vscode.window.activeColorTheme.kind === vscode.ColorThemeKind.Dark ||
         vscode.window.activeColorTheme.kind === vscode.ColorThemeKind.HighContrast;
-    const strokeColor = isDarkTheme ? '#ffffff' : '#000000';
+    const fillColor = isDarkTheme ? '#ffffff' : '';
 
     // Create a complete standalone SVG
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}" width="16" height="16" fill="none" stroke="${strokeColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${content}</svg>`;
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}" width="24" height="24" fill="${fillColor}">${content}</svg>`;
 
     // Create a data URI
     const dataUri = `data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}`;

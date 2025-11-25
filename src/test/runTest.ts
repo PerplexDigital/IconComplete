@@ -11,8 +11,8 @@ async function main() {
         // Passed to --extensionTestsPath
         const extensionTestsPath = path.resolve(__dirname, './suite/index');
 
-        // Use the existing test-project as the workspace
-        const testWorkspace = path.resolve(__dirname, '../../test-project');
+        // Use the existing test-nuxt as the workspace
+        const testWorkspace = path.resolve(__dirname, '../../test-nuxt');
 
         // Download VS Code, unzip it and run the integration test
         await runTests({

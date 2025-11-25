@@ -25,7 +25,7 @@ pnpm test
    - Or use the menu: Run > Start Debugging
 
 2. **In the New Window**
-   - Open the `test-project/app/app.vue` file
+   - Open the `test-nuxt/app/app.vue` file
    - Type `#` after `/icons/icons.svg` in any `<use href="">` attribute
    - The autocomplete should automatically trigger showing available icons
 
@@ -36,7 +36,7 @@ pnpm test
 
 **Test 1: Default Icon Path**
 - Extension looks for icons at `public/icons/icons.svg` by default
-- Test file includes 7 icons: home, user, search, heart, mail, star, check
+- Test file includes 10 icons
 
 **Test 2: Custom Icon Path**
 1. In Extension Development Host, open Settings (Cmd+,)
@@ -123,9 +123,9 @@ suite('My Tests', () => {
 
 ## Test Fixtures
 
-Tests use the existing `test-project` workspace:
-- `test-project/app/app.vue` - Vue file with icon references
-- `test-project/public/icons/icons.svg` - SVG sprite with 8 test icons
+Tests use the existing `test-nuxt` workspace:
+- `test-nuxt/app/app.vue` - Vue file with icon references
+- `test-nuxt/public/icons/icons.svg` - SVG sprite with 10 test icons
 
 ## Debugging Tests
 

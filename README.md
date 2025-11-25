@@ -27,12 +27,17 @@ You can also manually trigger autocomplete at any time:
 
 ## Configuration
 
-It's for vite projects so default path is `public/icons/icons.svg` but because it's vite you use `icons/icons.svg` (so without `public/`) in the href.
-You can configure the path to your SVG icon file in VS Code settings:
+The extension automatically detects your project configuration:
 
-**Default path**: `public/icons/icons.svg`
+- **Nuxt projects**: Automatically finds `nuxt.config.*` and looks for icons at `[project-root]/public/icons/icons.svg`
+- **Vite projects with custom root**: Reads the `root` option from `vite.config.*` and looks for icons at `[vite-root]/public/icons/icons.svg`
+- **Standard projects**: Falls back to `public/icons/icons.svg` from workspace root
 
-To override this:
+**Important**: The extension always looks for icons at `/public/icons/icons.svg` relative to your project or Vite root. The path you use in your `href` attribute is ignored - the extension automatically determines the correct file location based on your build configuration.
+
+### Manual Configuration
+
+You can manually configure the path to your SVG icon file in VS Code settings if needed:
 
 1. Open VS Code Settings (Cmd+, on macOS, Ctrl+, on Windows/Linux)
 2. Search for "IconComplete"
@@ -46,14 +51,37 @@ Or add to your `.vscode/settings.json`:
 }
 ```
 
+### Example Configurations
+
+**Nuxt Project:**
+- Config: `nuxt.config.ts` at project root
+- Icons location: `[project-root]/public/icons/icons.svg`
+- In your code: `<use href="/icons/icons.svg#home" />`
+
+**Vite Project with Custom Root:**
+```javascript
+// vite.config.mts
+export default {
+  root: 'src'
+}
+```
+- Icons location: `[project-root]/src/public/icons/icons.svg`
+- In your code: `<use href="/dist/icons/icons.svg#home" />` (or any path)
+
+The extension ignores the href path and uses the build configuration to find the actual icon file.
+
 ## How It Works
 
 The extension:
 1. Monitors your cursor position in supported file types
 2. Detects when you type `#` inside a `href` attribute
-3. Reads and parses your SVG sprite file
-4. Extracts all `<symbol id="...">` attributes
-5. Presents them as autocomplete suggestions
+3. Automatically finds your Vite or Nuxt config file
+4. Determines the correct icon file location (`public/icons/icons.svg` relative to your project/build root)
+5. Reads and parses your SVG sprite file
+6. Extracts all `<symbol id="...">` attributes
+7. Presents them as autocomplete suggestions
+
+**Note**: The path you use in your `href` attribute (e.g., `/icons/icons.svg` or `/dist/icons/icons.svg`) doesn't affect where the extension looks for the icon file. It always uses your build configuration to find the actual file location.
 
 ## Development
 

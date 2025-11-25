@@ -1,6 +1,7 @@
 # Source files
 src/**
-test-project/**
+test-nuxt/**
+test-cshtlml/**
 .vscode/**
 .vscode-test/**
 
