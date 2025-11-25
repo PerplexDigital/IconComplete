@@ -1,0 +1,41 @@
+# Source files
+src/**
+test-project/**
+.vscode/**
+.vscode-test/**
+
+# Build configuration
+tsconfig.json
+eslint.config.mjs
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# CI/CD
+.github/**
+
+# Dependencies
+node_modules
+pnpm-lock.yaml
+
+# Linting and formatting
+.eslintrc*
+.prettierrc*
+.editorconfig
+
+# Husky and git hooks
+.husky/**
+.lintstagedrc*
+.commitlintrc*
+
+# Testing
+**/.test.*
+**/test/**
+**/*.test.js
+**/*.test.ts
+
+# Misc
+*.vsix
+.DS_Store
