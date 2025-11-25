@@ -76,4 +76,6 @@ jobs:
 
       - name: Publish to VS Code Marketplace
         if: steps.version-bump.outputs.new-version != ''
-        run: vsce publish ${{ startsWith(github.ref, 'refs/heads/release/') && '--pre-release' || '' }}
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+        run: pnpm vsce publish ${{ startsWith(github.ref, 'refs/heads/release/') && '--pre-release' || '' }}
