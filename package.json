@@ -5,7 +5,7 @@
   "description": "Autocomplete for SVG icon references in <use /> href attributes",
   "version": "1.0.1",
   "engines": {
-    "vscode": "^1.85.0"
+    "vscode": "^1.106.1"
   },
   "categories": [
     "Snippets"
