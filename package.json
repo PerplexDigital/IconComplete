@@ -3,7 +3,7 @@
   "name": "icon-complete",
   "displayName": "IconComplete",
   "description": "Autocomplete for SVG icon references in <use /> href attributes",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "engines": {
     "vscode": "^1.106.1"
   },
