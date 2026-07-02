@@ -200,40 +200,65 @@ async function findViteRoot(): Promise<string | null> {
     return null;
 }
 
+// Resolve the configured icon file(s) to absolute paths, or null when nothing is configured.
+function getConfiguredIconPaths(workspaceRoot: string): string[] | null {
+    const config = vscode.workspace.getConfiguration('iconComplete');
+
+    // New array setting takes priority.
+    const arr = config.inspect<string[]>('iconFilePaths');
+    const explicitPaths = arr?.workspaceFolderValue ?? arr?.workspaceValue ?? arr?.globalValue;
+    if (explicitPaths && explicitPaths.length > 0) {
+        return explicitPaths.map((p) => path.join(workspaceRoot, p));
+    }
+
+    // Legacy single-path setting (kept for backward compatibility).
+    const single = config.inspect<string>('iconFilePath');
+    const explicitPath = single?.workspaceFolderValue ?? single?.workspaceValue ?? single?.globalValue;
+    if (explicitPath) {
+        return [path.join(workspaceRoot, explicitPath)];
+    }
+
+    return null;
+}
+
 async function getIconData(_svgPathInHref: string): Promise<IconData[]> {
     const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
     if (!workspaceFolder) {
         outputChannel.appendLine('No workspace folder found');
         return [];
     }
+    const workspaceRoot = workspaceFolder.uri.fsPath;
 
-    // Resolve the SVG path - ignore the href path and build from Vite config
-    let fullPath: string;
-
-    // First, try to find Vite root from config
-    const viteRoot = await findViteRoot();
-
-    if (viteRoot) {
-        // Build path as: vite.config directory + root option + /public/icons/icons.svg
-        fullPath = path.join(viteRoot, 'public', 'icons', 'icons.svg');
-        outputChannel.appendLine(`Built path from Vite config: "${fullPath}"`);
+    // An explicitly configured path always wins over auto-detection.
+    let paths = getConfiguredIconPaths(workspaceRoot);
+    if (paths) {
+        outputChannel.appendLine(`Using configured icon files: ${paths.join(', ')}`);
     } else {
-        // Fall back to configured path
-        const config = vscode.workspace.getConfiguration('iconComplete');
-        const iconFilePath = config.get<string>('iconFilePath', 'public/icons/icons.svg');
-        fullPath = path.join(workspaceFolder.uri.fsPath, iconFilePath);
-        outputChannel.appendLine(`Using configured path (no Vite config): "${fullPath}"`);
+        // No explicit setting: derive the default location from the Vite/Nuxt root.
+        const viteRoot = await findViteRoot();
+        const base = viteRoot ?? workspaceRoot;
+        paths = [path.join(base, 'public', 'icons', 'icons.svg')];
+        outputChannel.appendLine(`Using default icon file: "${paths[0]}"`);
     }
 
-    outputChannel.appendLine(`Resolved full path: "${fullPath}"`);
+    // Read/parse each file and merge, de-duplicating by icon id (first file wins).
+    const merged = new Map<string, IconData>();
+    for (const fullPath of paths) {
+        for (const icon of readIconFile(fullPath)) {
+            if (!merged.has(icon.id)) merged.set(icon.id, icon);
+        }
+    }
 
-    // Check cache
+    outputChannel.appendLine(`Merged ${merged.size} icons from ${paths.length} file(s)`);
+    return Array.from(merged.values());
+}
+
+function readIconFile(fullPath: string): IconData[] {
     if (iconCache.has(fullPath)) {
-        outputChannel.appendLine('Using cached icon data');
+        outputChannel.appendLine(`Using cached icon data for "${fullPath}"`);
         return iconCache.get(fullPath)!;
     }
 
-    // Read and parse SVG file
     try {
         if (!fs.existsSync(fullPath)) {
             const message = `Icon file not found: ${fullPath}`;
@@ -244,12 +269,9 @@ async function getIconData(_svgPathInHref: string): Promise<IconData[]> {
 
         const svgContent = fs.readFileSync(fullPath, 'utf-8');
         const iconData = parseIconData(svgContent);
+        outputChannel.appendLine(`Parsed ${iconData.length} icons from "${fullPath}"`);
 
-        outputChannel.appendLine(`Parsed ${iconData.length} icons from SVG`);
-
-        // Cache the results
         iconCache.set(fullPath, iconData);
-
         return iconData;
     } catch (error) {
         const message = `Error reading icon file: ${error}`;

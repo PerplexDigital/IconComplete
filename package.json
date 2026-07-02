@@ -23,10 +23,19 @@
     "configuration": {
       "title": "IconComplete",
       "properties": {
+        "iconComplete.iconFilePaths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "Paths to one or more SVG files containing icon symbols (relative to workspace root). Icons from all files are merged; on duplicate ids the first file wins."
+        },
         "iconComplete.iconFilePath": {
           "type": "string",
           "default": "public/icons/icons.svg",
-          "description": "Path to the SVG file containing icon symbols (relative to workspace root)"
+          "markdownDeprecationMessage": "Use `#iconComplete.iconFilePaths#` instead.",
+          "description": "Path to the SVG file containing icon symbols (relative to workspace root)."
         }
       }
     },
