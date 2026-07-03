@@ -1,100 +1,100 @@
 {
-    "name": "icon-complete",
-    "displayName": "IconComplete",
-    "version": "1.1.1",
-    "description": "Autocomplete for SVG icon references in <use /> href attributes",
-    "categories": [
-        "Snippets"
-    ],
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/PerplexDigital/IconComplete"
-    },
-    "publisher": "perplex-digital-bv",
-    "main": "./out/extension.js",
-    "scripts": {
-        "check": "vp check",
-        "fix": "vp check --fix",
-        "prepare": "vp config",
-        "vscode:prepublish": "npm run compile",
-        "compile": "tsc -p ./",
-        "watch": "tsc -watch -p ./",
-        "pretest": "npm run compile",
-        "test": "node ./out/test/runTest.js"
-    },
-    "devDependencies": {
-        "@commitlint/cli": "^20.1.0",
-        "@commitlint/config-conventional": "^20.0.0",
-        "@types/mocha": "^10.0.10",
-        "@types/node": "^24.10.1",
-        "@types/vscode": "^1.106.1",
-        "@vscode/test-electron": "^2.5.2",
-        "@vscode/vsce": "^3.7.1",
-        "glob": "^13.0.0",
-        "mocha": "^11.7.5",
-        "typescript": "^5.9.3",
-        "vite": "catalog:",
-        "vite-plus": "catalog:"
-    },
-    "contributes": {
-        "configuration": {
-            "title": "IconComplete",
-            "properties": {
-                "iconComplete.iconFilePaths": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    },
-                    "default": [],
-                    "description": "Paths to one or more SVG files containing icon symbols (relative to workspace root). Icons from all files are merged; on duplicate ids the first file wins."
-                },
-                "iconComplete.iconFilePath": {
-                    "type": "string",
-                    "default": "public/icons/icons.svg",
-                    "markdownDeprecationMessage": "Use `#iconComplete.iconFilePaths#` instead.",
-                    "description": "Path to the SVG file containing icon symbols (relative to workspace root)."
-                }
-            }
+  "name": "icon-complete",
+  "displayName": "IconComplete",
+  "version": "1.1.2",
+  "description": "Autocomplete for SVG icon references in <use /> href attributes",
+  "categories": [
+    "Snippets"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/PerplexDigital/IconComplete"
+  },
+  "publisher": "perplex-digital-bv",
+  "main": "./out/extension.js",
+  "scripts": {
+    "check": "vp check",
+    "fix": "vp check --fix",
+    "prepare": "vp config",
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^20.1.0",
+    "@commitlint/config-conventional": "^20.0.0",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^24.10.1",
+    "@types/vscode": "^1.106.1",
+    "@vscode/test-electron": "^2.5.2",
+    "@vscode/vsce": "^3.7.1",
+    "glob": "^13.0.0",
+    "mocha": "^11.7.5",
+    "typescript": "^5.9.3",
+    "vite": "catalog:",
+    "vite-plus": "catalog:"
+  },
+  "contributes": {
+    "configuration": {
+      "title": "IconComplete",
+      "properties": {
+        "iconComplete.iconFilePaths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "Paths to one or more SVG files containing icon symbols (relative to workspace root). Icons from all files are merged; on duplicate ids the first file wins."
         },
-        "configurationDefaults": {
-            "[html]": {
-                "editor.quickSuggestions": {
-                    "strings": true
-                }
-            },
-            "[cshtml]": {
-                "editor.quickSuggestions": {
-                    "strings": true
-                }
-            },
-            "[vue]": {
-                "editor.quickSuggestions": {
-                    "strings": true
-                }
-            },
-            "[svelte]": {
-                "editor.quickSuggestions": {
-                    "strings": true
-                }
-            },
-            "[javascriptreact]": {
-                "editor.quickSuggestions": {
-                    "strings": true
-                }
-            },
-            "[typescriptreact]": {
-                "editor.quickSuggestions": {
-                    "strings": true
-                }
-            }
+        "iconComplete.iconFilePath": {
+          "type": "string",
+          "default": "public/icons/icons.svg",
+          "markdownDeprecationMessage": "Use `#iconComplete.iconFilePaths#` instead.",
+          "description": "Path to the SVG file containing icon symbols (relative to workspace root)."
         }
+      }
     },
-    "activationEvents": [
-        "onStartupFinished"
-    ],
-    "icon": "icon.png",
-    "engines": {
-        "vscode": "^1.106.1"
-    },
-    "packageManager": "pnpm@11.0.9"
+    "configurationDefaults": {
+      "[html]": {
+        "editor.quickSuggestions": {
+          "strings": true
+        }
+      },
+      "[cshtml]": {
+        "editor.quickSuggestions": {
+          "strings": true
+        }
+      },
+      "[vue]": {
+        "editor.quickSuggestions": {
+          "strings": true
+        }
+      },
+      "[svelte]": {
+        "editor.quickSuggestions": {
+          "strings": true
+        }
+      },
+      "[javascriptreact]": {
+        "editor.quickSuggestions": {
+          "strings": true
+        }
+      },
+      "[typescriptreact]": {
+        "editor.quickSuggestions": {
+          "strings": true
+        }
+      }
+    }
+  },
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "icon": "icon.png",
+  "engines": {
+    "vscode": "^1.106.1"
+  },
+  "packageManager": "pnpm@11.0.9"
 }
