@@ -43,9 +43,7 @@ function getLatestTag() {
  */
 function getCommitsSinceLastTag() {
     const latestTag = getLatestTag();
-    const command = latestTag
-        ? `git log ${latestTag}..HEAD --pretty=format:"%s"`
-        : 'git log --pretty=format:"%s"';
+    const command = latestTag ? `git log ${latestTag}..HEAD --pretty=format:"%s"` : 'git log --pretty=format:"%s"';
 
     const output = exec(command);
     return output ? output.split('\n').filter(Boolean) : [];
@@ -93,7 +91,7 @@ function parseVersion(version) {
         major: parseInt(match[1], 10),
         minor: parseInt(match[2], 10),
         patch: parseInt(match[3], 10),
-        prerelease: match[4] || null
+        prerelease: match[4] || null,
     };
 }
 
@@ -205,7 +203,7 @@ function main() {
     writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2) + '\n');
 
     console.log('✓ Updated package.json');
-    
+
     // Write outputs to GitHub Actions environment file
     if (process.env.GITHUB_OUTPUT) {
         appendFileSync(process.env.GITHUB_OUTPUT, `old-version=${currentVersion}\n`);

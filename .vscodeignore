@@ -7,7 +7,6 @@ test-cshtml/**
 
 # Build configuration
 tsconfig.json
-eslint.config.mjs
 
 # Git
 .git
@@ -22,13 +21,9 @@ node_modules
 pnpm-lock.yaml
 
 # Linting and formatting
-.eslintrc*
-.prettierrc*
 .editorconfig
 
 # Husky and git hooks
-.husky/**
-.lintstagedrc*
 .commitlintrc*
 
 # Testing

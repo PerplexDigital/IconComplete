@@ -1,5 +1,5 @@
 import dns from 'dns';
-import { defineConfig, loadEnv } from 'vite';
+import { defineConfig, loadEnv } from 'vite-plus';
 import mkcert from 'vite-plugin-mkcert';
 
 dns.setDefaultResultOrder('verbatim');

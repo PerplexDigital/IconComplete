@@ -22,6 +22,7 @@ Type `#` after `/icons/icons.svg` in any `<use href="">` attribute:
 The extension automatically enables quick suggestions in HTML, CSHTML, Vue, Svelte and React files. When you type `#` after the SVG path, autocomplete will automatically appear with available icon IDs from your SVG sprite file.
 
 You can also manually trigger autocomplete at any time:
+
 - **macOS**: `Option + Esc` or `Cmd + I`
 - **Windows/Linux**: `Ctrl + Space`
 
@@ -47,24 +48,27 @@ Or add to your `.vscode/settings.json`:
 
 ```json
 {
-  "iconComplete.iconFilePath": "path/to/your/icons.svg"
+    "iconComplete.iconFilePath": "path/to/your/icons.svg"
 }
 ```
 
 ### Example Configurations
 
 **Nuxt Project:**
+
 - Config: `nuxt.config.ts` at project root
 - Icons location: `[project-root]/public/icons/icons.svg`
 - In your code: `<use href="/icons/icons.svg#home" />`
 
 **Vite Project with Custom Root:**
+
 ```javascript
 // vite.config.mts
 export default {
-  root: 'src'
-}
+    root: 'src',
+};
 ```
+
 - Icons location: `[project-root]/src/public/icons/icons.svg`
 - In your code: `<use href="/dist/icons/icons.svg#home" />` (or any path)
 
@@ -73,6 +77,7 @@ The extension ignores the href path and uses the build configuration to find the
 ## How It Works
 
 The extension:
+
 1. Monitors your cursor position in supported file types
 2. Detects when you type `#` inside a `href` attribute
 3. Automatically finds your Vite or Nuxt config file
