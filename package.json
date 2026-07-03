@@ -1,7 +1,7 @@
 {
   "name": "icon-complete",
   "displayName": "IconComplete",
-  "version": "1.1.2",
+  "version": "1.2.0",
   "description": "Autocomplete for SVG icon references in <use /> href attributes",
   "categories": [
     "Snippets"
