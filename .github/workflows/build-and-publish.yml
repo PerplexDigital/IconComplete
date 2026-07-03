@@ -1,6 +1,6 @@
-# This workflow is intended to run as soon as a commit is pushed to the target branch.
+# Builds, bumps version, tags, and publishes to Visual Studio Code Marketplace when a commit is pushed to the target branch.
 
-name: Push
+name: Build & Publish
 
 # Controls when the action will run.
 on:
@@ -24,21 +24,20 @@ jobs:
     steps:
       # We need to check out everything that tags can be found
       # https://github.com/actions/checkout
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
       # https://github.com/pnpm/action-setup
-      - uses: pnpm/action-setup@v4
-        with:
-          version: latest
+      # Version comes from "packageManager" in package.json
+      - uses: pnpm/action-setup@v6
 
       # https://github.com/actions/setup-node
-      - name: Setup Node.js 24.x
-        uses: actions/setup-node@v5
+      - name: Setup Node.js 26.x
+        uses: actions/setup-node@v6
         with:
-          node-version: 24.x
+          node-version: 26.x
           cache: 'pnpm'
           registry-url: 'https://registry.npmjs.org'
 
