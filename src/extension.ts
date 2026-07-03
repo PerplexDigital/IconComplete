@@ -9,6 +9,11 @@ interface IconQuickPickItem extends vscode.QuickPickItem {
     iconId: string;
 }
 
+interface IconGroup {
+    file: string;
+    icons: IconData[];
+}
+
 export function activate(context: vscode.ExtensionContext) {
     outputChannel = vscode.window.createOutputChannel('IconComplete');
     outputChannel.appendLine('IconComplete extension is now active');
@@ -75,16 +80,20 @@ async function showIconPicker() {
     const existingText = match[2];
     outputChannel.appendLine(`Found SVG path: "${svgPath}", existing text: "${existingText}"`);
 
-    // Get icon data (IDs and symbols)
-    const iconData = await getIconData(svgPath);
+    // Get icon data grouped by source file
+    const { groups: iconGroups, paths } = await getIconData(svgPath);
+    const totalIcons = iconGroups.reduce((sum, g) => sum + g.icons.length, 0);
 
-    if (!iconData || iconData.length === 0) {
+    if (totalIcons === 0) {
         outputChannel.appendLine('No icon IDs found');
-        vscode.window.showWarningMessage('No icons found in SVG file');
+        vscode.window.showWarningMessage(
+            `No icons found. Checked ${paths.length} file(s): ${paths.join(', ')}. ` +
+                'Verify the paths in iconComplete.iconFilePaths exist and contain <symbol> elements.',
+        );
         return;
     }
 
-    outputChannel.appendLine(`Found ${iconData.length} icons`);
+    outputChannel.appendLine(`Found ${totalIcons} icons`);
 
     // Create QuickPick
     const quickPick = vscode.window.createQuickPick<IconQuickPickItem>();
@@ -92,13 +101,24 @@ async function showIconPicker() {
     quickPick.matchOnDetail = true;
     quickPick.matchOnDescription = false;
 
-    // Create items with icon previews
-    quickPick.items = iconData.map(({ id, symbolElement }) => ({
-        label: id,
-        alwaysShow: false,
-        iconId: id,
-        iconPath: symbolElement ? createIconDataUri(symbolElement) : undefined,
-    }));
+    // Build items: a separator header per file, followed by its icons
+    const items: IconQuickPickItem[] = [];
+    for (const group of iconGroups) {
+        items.push({
+            label: group.file,
+            kind: vscode.QuickPickItemKind.Separator,
+            iconId: '',
+        });
+        for (const { id, symbolElement } of group.icons) {
+            items.push({
+                label: id,
+                alwaysShow: false,
+                iconId: id,
+                iconPath: symbolElement ? createIconDataUri(symbolElement) : undefined,
+            });
+        }
+    }
+    quickPick.items = items;
 
     // Set initial filter if there's existing text
     if (existingText) {
@@ -221,11 +241,11 @@ function getConfiguredIconPaths(workspaceRoot: string): string[] | null {
     return null;
 }
 
-async function getIconData(_svgPathInHref: string): Promise<IconData[]> {
+async function getIconData(_svgPathInHref: string): Promise<{ groups: IconGroup[]; paths: string[] }> {
     const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
     if (!workspaceFolder) {
         outputChannel.appendLine('No workspace folder found');
-        return [];
+        return { groups: [], paths: [] };
     }
     const workspaceRoot = workspaceFolder.uri.fsPath;
 
@@ -241,16 +261,22 @@ async function getIconData(_svgPathInHref: string): Promise<IconData[]> {
         outputChannel.appendLine(`Using default icon file: "${paths[0]}"`);
     }
 
-    // Read/parse each file and merge, de-duplicating by icon id (first file wins).
-    const merged = new Map<string, IconData>();
+    // Group icons by source file, de-duplicating by id across files (first file wins),
+    // and sort each group's icons alphabetically.
+    const seen = new Set<string>();
+    const groups: IconGroup[] = [];
     for (const fullPath of paths) {
-        for (const icon of readIconFile(fullPath)) {
-            if (!merged.has(icon.id)) merged.set(icon.id, icon);
+        const icons = readIconFile(fullPath)
+            .filter((icon) => !seen.has(icon.id) && (seen.add(icon.id), true))
+            .sort((a, b) => a.id.localeCompare(b.id));
+        if (icons.length > 0) {
+            groups.push({ file: path.basename(fullPath, '.svg'), icons });
         }
     }
 
-    outputChannel.appendLine(`Merged ${merged.size} icons from ${paths.length} file(s)`);
-    return Array.from(merged.values());
+    const total = groups.reduce((sum, g) => sum + g.icons.length, 0);
+    outputChannel.appendLine(`Merged ${total} icons from ${paths.length} file(s)`);
+    return { groups, paths };
 }
 
 function readIconFile(fullPath: string): IconData[] {
